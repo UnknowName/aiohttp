@@ -12,9 +12,9 @@ WECHAT_TOKEN = "hJqcu3uJ9Tn2gXPmxx2w9kkCkCE2EPYo"
 # Kubernetes Info
 # default-token=$(kubectl get secret |grep default-token | awk '{print $1}')
 # kubectl describe ${default-token}|grep ^token |awk '{print $NF}'
-K8S_TOKEN = ""
+# K8S_TOKEN = ""
 
-K8S_APISERVER = "https://192.168.1.1:8443"
+# K8S_APISERVER = "https://192.168.1.1:8443"
 
 # Simple Access Control
 ALLOW_USERS = ['tkggvfhpce2']
