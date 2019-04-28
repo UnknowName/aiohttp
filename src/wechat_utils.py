@@ -121,12 +121,15 @@ class AsyncWechat(object):
 
     async def send_msg(self, to_user: list, msg: str):
         msg_data = dict(
-            touser='|'.join(to_user), msgtype='text', agentid=0, text=dict(content=msg)
+            touser='|'.join(to_user), 
+            msgtype='text', agentid=0, 
+            text=dict(content=msg)
         )
-        print(msg_data)
         token = await self.get_token()
         try:
-            async with aiohttp.request("POST", self.send_fmt.format(token=token), json=msg_data) as resp:
+            async with aiohttp.request("POST", 
+                                       self.send_fmt.format(token=token),
+                                       json=msg_data) as resp:
                 await resp.json()
         except Exception as e:
             print(e)
