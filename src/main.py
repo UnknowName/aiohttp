@@ -1,20 +1,16 @@
 #!/bin/env python3
 import time
 import urllib.parse
+from subprocess import run, STDOUT, PIPE
 
 from aiohttp import web
 
 import setting
 from log import Log
-from cmd import run_cmd
 from wechat_utils import WechatCrypto, WechatXML, AsyncWechat
 
 
-log = Log('__name__').get_loger()
-log.info("Start at {}".format(time.asctime()))
-
 async def hello(request):
-    log.info(request.remote)
     start = time.time()
     args = request.query
     wechat_sign = args.get("msg_signature")
@@ -24,7 +20,7 @@ async def hello(request):
     wxcrypt = WechatCrypto(setting.WECHAT_CORPID, 
                            setting.WECHAT_TOKEN, setting.WECHAT_AESKEY)
     if request.method == "GET":
-        echostr = urllib.parse.unquote(args.get('echostr'))
+        echostr = urllib.parse.unquote(args.get('echostr', ""))
         msg_sign = wxcrypt.get_signature(msg_timestamp,
                                          msg_nonce,
                                          echostr)
@@ -67,7 +63,14 @@ async def hello(request):
         return web.Response(status="405", text="Not allowed method")
 
 
+async def run_cmd(cmd: str) -> str:
+    stdout = run(cmd, shell=True, stdout=PIPE, stderr=STDOUT).stdout
+    return stdout.decode("utf8")
+
+
 if __name__ == "__main__":
+    log = Log('__name__').get_loger()
+    log.info("Start at {}".format(time.asctime()))
     app = web.Application()
     app.add_routes(
         [
