@@ -17,4 +17,4 @@ WECHAT_TOKEN = "hJqcu3uJ9Tn2gXPmxx2w9kkCkCE2EPYo"
 # K8S_APISERVER = "https://192.168.1.1:8443"
 
 # Simple Access Control
-ALLOW_USERS = ['tkggvfhpce2']
+ALLOW_USERS = ['tkggvfhpce2', 'Angel-tencent']
