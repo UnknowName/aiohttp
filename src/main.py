@@ -11,7 +11,6 @@ from wechat_utils import WechatCrypto, WechatXML, AsyncWechat
 
 
 async def hello(request):
-    start = time.time()
     args = request.query
     wechat_sign = args.get("msg_signature")
     msg_timestamp = args.get("timestamp")
@@ -45,7 +44,7 @@ async def hello(request):
                                                     msg_nonce, 
                                                     encry_msg):
                 log.warn("消息签名不一致")
-                return web.Response(status="403", text="deny")
+                return web.Response(status=403, text="deny")
             plain_msg = wxcrypt.decry_msg(encry_msg)
             # 解密后的内容，又是XML数据, 文本消息在Content里面
             msg = await WechatXML.parse_data(plain_msg, "Content")
@@ -57,10 +56,10 @@ async def hello(request):
             else:
                 log.info("User " + user + "not privilege")
                 await wxclient.send_msg([user], "Permistion Deny")
-        return web.Response(status="200", text="ok")
+        return web.Response(status=200, text="ok")
     else:
         log.info("Not Support method {}".format(args.method))
-        return web.Response(status="405", text="Not allowed method")
+        return web.Response(status=405, text="Not allowed method")
 
 
 async def run_cmd(cmd: str) -> str:

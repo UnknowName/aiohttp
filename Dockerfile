@@ -8,8 +8,7 @@ RUN adduser -D -u 120002 -h /opt/app app \
     && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && pip install --no-cache-dir -i https://pypi.douban.com/simple -r reuqirements.txt\
     && apk del gcc g++ make libffi-dev openssl-dev tzdata \
-    && rm -rf /var/cache/apk/* \
-    && date
+    && rm -rf /var/cache/apk/*
 ADD ./kubectl /usr/local/bin/
 ADD ./.kube   /opt/app/.kube
 RUN chown -R app:app /opt/app
