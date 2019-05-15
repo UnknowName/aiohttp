@@ -14,7 +14,8 @@ class Log(object):
         ch = logging.StreamHandler()
         ch.setLevel(logging.DEBUG)
         ch.setFormatter(self.fmt)
-        self.logger.addHandler(ch)
+        if not self.logger.handlers:
+            self.logger.addHandler(ch)
         if filename:
             fh = logging.handlers.TimedRotatingFileHandler(filename, 'D', 1, 7)
             fh.setLevel(logging.DEBUG)
