@@ -15,3 +15,6 @@ WECHAT_TOKEN = "hJqcu3uJ9Tn2gXPmxx2w9kkCkCE2EPYo"
 
 # Simple Access Control
 ALLOW_USERS = ['tkggvfhpce2', 'angel-tencent']
+
+# Send wechat msg
+NOTIFY_USERS = ['tkggvfhpce2']
