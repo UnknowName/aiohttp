@@ -1,7 +1,4 @@
-#!/bin/env python3
-
 import os
-import json
 import time
 import pickle
 import base64
@@ -12,9 +9,6 @@ import xml.etree.ElementTree as ET
 
 import aiohttp
 from Crypto.Cipher import AES
-
-class WechatError(Exception):
-    pass
 
 
 class WechatXML(object):
@@ -48,10 +42,9 @@ class WechatCrypto(object):
             pad_byte = size
         return msg + (chr(pad_byte) * pad_byte)
 
-    def _unpad(self, padded_msg: bytes) -> bytes:
+    @staticmethod
+    def _unpad(padded_msg: bytes) -> bytes:
         """解包微信加密消息"""
-        # 获取加密算法的填充值
-        pad_len = padded_msg[-1]
         # 16字节随机填充+4字节的消息长度
         len_byte = padded_msg[16:20]
         # 四字节的长度转换成Python的整型
@@ -61,8 +54,7 @@ class WechatCrypto(object):
         return msg
         
     def get_signature(self, timestamp: str, nonce: str, encry_msg: str) -> str:
-        "获取消息签名,echostr必须是urldocode后的字符串"
-        # echo_decode = urllib.parse.unquote(echostr)
+        """获取消息签名,echostr必须是urldocode后的字符串"""
         try:
             sort_str = ''.join(sorted([self.token, timestamp, nonce, encry_msg]))
             echo_sign = hashlib.sha1(sort_str.encode("utf8")).hexdigest()
@@ -71,7 +63,7 @@ class WechatCrypto(object):
         return echo_sign
 
     def decry_msg(self, crypto_msg: str) -> str:
-        "解密微信消息"
+        """解密微信消息"""
         base64_msg = base64.b64decode(crypto_msg)
         aes_key = base64.b64decode(self.aes_key + '=')
         iv = aes_key[:16]
@@ -91,16 +83,21 @@ class AsyncWechat(object):
     async def _fetch_token(self):
         async with aiohttp.request("GET", self.token_url) as resp:
             json_data = await resp.json()
-            return json_data.get("access_token")
+            if json_data.get("errcode", 1):
+                print(json_data.get("errmsg"))
+                # raise WechatError(json_data.get("errmsg"))
+            else:
+                return json_data.get("access_token")
 
-    async def _cache_token(self, token: str):
+    @staticmethod
+    async def _cache_token(token: str) -> bool:
         expiry_time = time.time() + (2 * 60 * 60)
         cache_dic = dict(token=token, expiry_time=expiry_time)
         with open('token.cache', 'wb') as f:
             pickle.dump(cache_dic, f)
             return True
 
-    async def get_token(self):
+    async def get_token(self) -> str:
         if os.path.exists('token.cache'):
             with open('token.cache', 'rb') as f:
                 token_dic = pickle.load(f)
@@ -111,6 +108,7 @@ class AsyncWechat(object):
                 else:
                     return token_dic.get("token")
         else:
+            """
             try:
                 token = await self._fetch_token
             except Exception as e:
@@ -118,21 +116,29 @@ class AsyncWechat(object):
             else:
                 await self._cache_token(token)
                 return token
+            """
+            token = await self._fetch_token
+            if token:
+                await self._cache_token(token)
+                return token
 
-    async def send_msg(self, to_user: list, msg: str):
+    async def send_msg(self, to_user: list, msg: str) -> str:
         msg_data = dict(
             touser='|'.join(to_user), 
             msgtype='text', agentid=0, 
             text=dict(content=msg)
         )
         token = await self.get_token()
+        if not token:
+            return ""
         try:
-            async with aiohttp.request("POST", 
+            async with aiohttp.request("POST",
                                        self.send_fmt.format(token=token),
                                        json=msg_data) as resp:
-                await resp.json()
+                return await resp.json()
         except Exception as e:
             print(e)
+            return ""
 
 
 if __name__ == "__main__":
