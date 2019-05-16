@@ -1,4 +1,3 @@
-#!/bin/env python3
 import time
 import urllib.parse
 from subprocess import run, STDOUT, PIPE
@@ -7,10 +6,11 @@ from aiohttp import web
 
 import setting
 from log import Log
+from graylog_alert import graylog
 from wechat_utils import WechatCrypto, WechatXML, AsyncWechat
 
 
-async def hello(request):
+async def wechat(request):
     args = request.query
     wechat_sign = args.get("msg_signature")
     msg_timestamp = args.get("timestamp")
@@ -24,7 +24,7 @@ async def hello(request):
                                          msg_nonce,
                                          echostr)
         if msg_sign != wechat_sign:
-            log.warn("消息签名不一致")
+            log.warning("消息签名不一致")
             return web.Response(status=405, text="novalied signature")
         echostr = wxcrypt.decry_msg(echostr)
         return web.Response(status=200, text=echostr)
@@ -43,7 +43,7 @@ async def hello(request):
             if wechat_sign != wxcrypt.get_signature(msg_timestamp,
                                                     msg_nonce, 
                                                     encry_msg):
-                log.warn("消息签名不一致")
+                log.warning("消息签名不一致")
                 return web.Response(status=403, text="deny")
             plain_msg = wxcrypt.decry_msg(encry_msg)
             # 解密后的内容，又是XML数据, 文本消息在Content里面
@@ -73,8 +73,11 @@ if __name__ == "__main__":
     app = web.Application()
     app.add_routes(
         [
-            web.get('/wechat', hello),
-            web.post('/wechat', hello),
+            web.get('/wechat', wechat),
+            web.post('/wechat', wechat),
+            # Graylog Alert
+            web.get('/graylog', graylog),
+            web.post('/graylog', graylog)
         ]
     )
     web.run_app(app, port=8080)
