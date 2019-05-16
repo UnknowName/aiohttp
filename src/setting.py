@@ -1,11 +1,8 @@
-#!/bin/env python3
-
-
 WECHAT_AESKEY = "6qkdMrq68nTKduznJYO1A37W2oEgpkMUvkttRToqhUt"
 
 WECHAT_CORPID = "wx4586a09d8a238d66"
 
-WECHAT_SECRET = "70iY5xGoRepqx2L6PqX2P6WjgRAQ9ZnCSvtO5T0YUXE"
+WECHAT_SECRET = "secret"
 
 WECHAT_TOKEN = "hJqcu3uJ9Tn2gXPmxx2w9kkCkCE2EPYo"
 
