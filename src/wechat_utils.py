@@ -40,7 +40,8 @@ class WechatCrypto(object):
         pad_byte = size - (msg_len % size)
         if msg_len % size == 0:
             pad_byte = size
-        return msg + (chr(pad_byte) * pad_byte)
+        padded_msg = msg + bytes((chr(pad_byte) * pad_byte), encoding="utf8")
+        return padded_msg
 
     @staticmethod
     def _unpad(padded_msg: bytes) -> bytes:
