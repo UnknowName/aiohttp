@@ -1,10 +1,12 @@
-WECHAT_AESKEY = "6qkdMrq68nTKduznJYO1A37W2oEgpkMUvkttRToqhUt"
+import os
 
-WECHAT_CORPID = "wx4586a09d8a238d66"
+WECHAT_AESKEY = os.getenv("WECHAT_AESKEY", False)
 
-WECHAT_SECRET = "secret"
+WECHAT_CORPID = os.getenv("WECHAT_CORPID", False)
 
-WECHAT_TOKEN = "hJqcu3uJ9Tn2gXPmxx2w9kkCkCE2EPYo"
+WECHAT_SECRET = os.getenv("WECHAT_SECRET", False)
+
+WECHAT_TOKEN = os.getenv("WECHAT_TOKEN", False)
 
 # Kubernetes Info
 # default-token=$(kubectl get secret |grep default-token | awk '{print $1}')
@@ -18,3 +20,24 @@ ALLOW_USERS = ['tkggvfhpce2', 'angel-tencent']
 
 # Send wechat msg
 NOTIFY_USERS = ['tkggvfhpce2']
+
+
+class EnvError(Exception):
+    pass
+
+
+if not WECHAT_AESKEY:
+    raise EnvError("WECHAT_AESKEY  environment not set")
+
+if not WECHAT_CORPID:
+    raise EnvError("WECHAT_CORPID  environment not set")
+
+if not WECHAT_SECRET:
+    raise EnvError("WECHAT_SECRET environment not set")
+
+if not WECHAT_TOKEN:
+    raise EnvError("WECHAT_TOKEN environment not set")
+
+
+if __name__ == '__main__':
+    print(os.getenv("WECHAT_AESKEY"))
