@@ -20,7 +20,8 @@ class WechatXML(object):
         try:
             root = ET.fromstring(xml_data)
             text = root.find(attr).text
-        except Exception:
+        # No the attr
+        except AttributeError:
             text = ""
         return text
 
