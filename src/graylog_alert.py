@@ -3,14 +3,10 @@ from datetime import datetime, timedelta
 from aiohttp import web
 
 import setting
-from wechat_utils import AsyncWechat
-# from log import Log
-
-# log = Log('__name__').get_loger()
-wx = AsyncWechat(setting.WECHAT_CORPID, setting.WECHAT_SECRET)
 
 
 async def graylog(request):
+    wx_notify = request.get("notify")
     if request.method == "POST":
         msg = await request.json()
         result_msg = msg.get("check_result")
@@ -22,7 +18,7 @@ async def graylog(request):
             err_from = err_log.get("source")
             log_item = "Time: {0}\nErrorLog: {1}\nAPP: {2}\n".format(err_time, err_msg, err_from)
             message += log_item + ('-' * 20) + "\n"
-        await wx.send_msg(setting.NOTIFY_USERS, message)
+        await wx_notify(setting.NOTIFY_USERS, message)
     return web.Response(status=200, text=request.method)
 
 

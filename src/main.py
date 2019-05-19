@@ -6,16 +6,17 @@ from aiohttp import web
 
 import setting
 from log import Log
+from middleware import add_notify
 from graylog_alert import graylog
-from wechat_utils import WechatCrypto, WechatXML, AsyncWechat
+from wechat_utils import WechatCrypto, WechatXML
 
 
 async def wechat(request):
+    wx_notify = request.get("notify")
     args = request.query
     wechat_sign = args.get("msg_signature")
     msg_timestamp = args.get("timestamp")
     msg_nonce = args.get("nonce")
-    wxclient = AsyncWechat(setting.WECHAT_CORPID, setting.WECHAT_SECRET)
     wxcrypt = WechatCrypto(setting.WECHAT_CORPID, 
                            setting.WECHAT_TOKEN, setting.WECHAT_AESKEY)
     if request.method == "GET":
@@ -52,10 +53,10 @@ async def wechat(request):
             if user in setting.ALLOW_USERS:
                 log.info("user " + user + " run " + msg)
                 cmd_output = await run_cmd(msg)
-                await wxclient.send_msg([user], cmd_output) 
+                await wx_notify([user], cmd_output)
             else:
                 log.info("User " + user + "not privilege")
-                await wxclient.send_msg([user], "Permistion Deny")
+                await wx_notify([user], "Permission Deny")
         return web.Response(status=200, text="ok")
     else:
         log.info("Not Support method {}".format(args.method))
@@ -70,7 +71,7 @@ async def run_cmd(cmd: str) -> str:
 if __name__ == "__main__":
     log = Log('__name__').get_loger()
     log.info("Start at {}".format(time.asctime()))
-    app = web.Application()
+    app = web.Application(middlewares=[add_notify])
     app.add_routes(
         [
             web.get('/wechat', wechat),
