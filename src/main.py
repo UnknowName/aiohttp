@@ -51,7 +51,7 @@ async def wechat(request):
             msg = await WechatXML.parse_data(plain_msg, "Content")
             user = await WechatXML.parse_data(plain_msg, "FromUserName")
             if user in setting.WECHAT_ALLOW_USERS:
-                log.info("user {user} run {cmd}".format(usr=user, cmd=msg))
+                log.info("user {user} run {cmd}".format(user=user, cmd=msg))
                 cmd_output = await run_cmd(msg)
                 await wx_notify([user], cmd_output)
             else:
