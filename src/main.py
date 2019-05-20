@@ -50,7 +50,7 @@ async def wechat(request):
             # 解密后的内容，又是XML数据, 文本消息在Content里面
             msg = await WechatXML.parse_data(plain_msg, "Content")
             user = await WechatXML.parse_data(plain_msg, "FromUserName")
-            if user in setting.ALLOW_USERS:
+            if user in setting.ALLOW_USERS.split(","):
                 log.info("user " + user + " run " + msg)
                 cmd_output = await run_cmd(msg)
                 await wx_notify([user], cmd_output)

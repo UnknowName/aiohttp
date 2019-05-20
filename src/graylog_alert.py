@@ -18,7 +18,7 @@ async def graylog(request):
             err_from = err_log.get("source")
             log_item = "Time: {0}\nErrorLog: {1}\nAPP: {2}\n".format(err_time, err_msg, err_from)
             message += log_item + ('-' * 20) + "\n"
-        await wx_notify(setting.NOTIFY_USERS, message)
+        await wx_notify(setting.NOTIFY_USERS.split(","), message)
     return web.Response(status=200, text=request.method)
 
 
