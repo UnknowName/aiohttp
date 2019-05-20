@@ -11,14 +11,14 @@ async def graylog(request):
         msg = await request.json()
         result_msg = msg.get("check_result")
         err_logs = result_msg.get("matching_messages")
-        message = "日志系统检测到异常，以下是异常详情：\n"
+        message = "日志系统检测到异常，以下是最近的异常详情：\n"
         for err_log in err_logs:
             err_time = utc2sh(err_log.get("timestamp"))
             err_msg = err_log.get("message")
             err_from = err_log.get("source")
             log_item = "Time: {0}\nErrorLog: {1}\nAPP: {2}\n".format(err_time, err_msg, err_from)
             message += log_item + ('-' * 20) + "\n"
-        await wx_notify(setting.NOTIFY_USERS.split(","), message)
+        await wx_notify(setting.WECHAT_NOTIFY_USERS, message)
     return web.Response(status=200, text=request.method)
 
 

@@ -16,10 +16,10 @@ WECHAT_TOKEN = os.getenv("WECHAT_TOKEN", False)
 # K8S_APISERVER = "https://192.168.1.1:8443"
 
 # Simple Access Control
-ALLOW_USERS = os.getenv("WECHAT_ALLOW_USERS")
+WECHAT_ALLOW_USERS = os.getenv("WECHAT_ALLOW_USERS").split(",")
 
 # Send wechat msg
-NOTIFY_USERS = os.getenv("WECHAT_NOTIFY_USERS")
+WECHAT_NOTIFY_USERS = os.getenv("WECHAT_NOTIFY_USERS").split(",")
 
 
 class EnvError(Exception):
@@ -40,5 +40,4 @@ if not WECHAT_TOKEN:
 
 
 if __name__ == '__main__':
-    print(os.getenv("WECHAT_NOTIFY_USERS").split(","))
-    print(os.getenv("WECHAT_ALLOW_USERS").split(","))
+    print(WECHAT_ALLOW_USERS)

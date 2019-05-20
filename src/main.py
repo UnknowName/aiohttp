@@ -50,12 +50,12 @@ async def wechat(request):
             # 解密后的内容，又是XML数据, 文本消息在Content里面
             msg = await WechatXML.parse_data(plain_msg, "Content")
             user = await WechatXML.parse_data(plain_msg, "FromUserName")
-            if user in setting.ALLOW_USERS.split(","):
-                log.info("user " + user + " run " + msg)
+            if user in setting.WECHAT_ALLOW_USERS:
+                log.info("user {user} run {cmd}".format(usr=user, cmd=msg))
                 cmd_output = await run_cmd(msg)
                 await wx_notify([user], cmd_output)
             else:
-                log.info("User " + user + "not privilege")
+                log.info("User {user} not privilege".format(user=user))
                 await wx_notify([user], "Permission Deny")
         return web.Response(status=200, text="ok")
     else:
