@@ -1,0 +1,8 @@
+---
+- hosts:
+  - 172.18.11.10
+  tasks:
+  - name: Restart www.dx.com IIS WebApplicationPool
+    win_iis_webapppool:
+      name: www.dx.com
+      state: restart
