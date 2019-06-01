@@ -8,18 +8,11 @@ WECHAT_SECRET = os.getenv("WECHAT_SECRET", False)
 
 WECHAT_TOKEN = os.getenv("WECHAT_TOKEN", False)
 
-# Kubernetes Info
-# default-token=$(kubectl get secret |grep default-token | awk '{print $1}')
-# kubectl describe ${default-token}|grep ^token |awk '{print $NF}'
-# K8S_TOKEN = ""
-
-# K8S_APISERVER = "https://192.168.1.1:8443"
-
 # Simple Access Control
-WECHAT_ALLOW_USERS = os.getenv("WECHAT_ALLOW_USERS").split(",")
+WECHAT_ALLOW_USERS = os.getenv("WECHAT_ALLOW_USERS", "").split(",")
 
 # Send wechat msg
-WECHAT_NOTIFY_USERS = os.getenv("WECHAT_NOTIFY_USERS").split(",")
+WECHAT_NOTIFY_USERS = os.getenv("WECHAT_NOTIFY_USERS", "").split(",")
 
 
 class EnvError(Exception):
