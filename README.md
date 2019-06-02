@@ -31,6 +31,9 @@ docker build -t wechat .
 wechat-shell:
   image: wechat:dev
   container_name: wechat-shell
+  volumes:
+    - ./ansible_hosts:/etc/ansible/hosts
+    - ./hosts:/etc/hosts
   environment:
     # 相关变量不需要加`"`双引号
     - WECHAT_CORPID=your_corpid
