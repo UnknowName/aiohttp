@@ -8,6 +8,7 @@ import setting
 from utils.log import Log
 from middleware import add_notify
 from graylog_alert import graylog
+from utils.recycle import convert_cmd
 from utils.wechat import WechatCrypto, WechatXML
 
 
@@ -18,7 +19,8 @@ async def wechat(request):
     msg_timestamp = args.get("timestamp")
     msg_nonce = args.get("nonce")
     wxcrypt = WechatCrypto(setting.WECHAT_CORPID, 
-                           setting.WECHAT_TOKEN, setting.WECHAT_AESKEY)
+                           setting.WECHAT_TOKEN,
+                           setting.WECHAT_AESKEY)
     if request.method == "GET":
         echostr = urllib.parse.unquote(args.get('echostr', ""))
         msg_sign = wxcrypt.get_signature(msg_timestamp,
@@ -52,7 +54,8 @@ async def wechat(request):
             user = await WechatXML.parse_data(plain_msg, "FromUserName")
             if user in setting.WECHAT_ALLOW_USERS:
                 log.info("user {user} run {cmd}".format(user=user, cmd=msg))
-                cmd_output = await run_cmd(msg)
+                cmd = await convert_cmd(msg)
+                cmd_output = await run_cmd(cmd)
                 await wx_notify([user], cmd_output)
             else:
                 log.info("User {user} not privilege".format(user=user))

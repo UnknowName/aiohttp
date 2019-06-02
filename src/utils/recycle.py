@@ -1,4 +1,4 @@
-RECYCLE_TEMPLATE = """---
+_RECYCLE_TEMPLATE = """---
 - hosts:
   - {host}
   gather_facts: False
@@ -10,8 +10,8 @@ RECYCLE_TEMPLATE = """---
 """
 
 
-async def create_task_yaml(host: str, domain: str) -> bool:
-    task_str = RECYCLE_TEMPLATE.format(host=host, domain=domain)
+async def _create_task_yaml(host: str, domain: str) -> bool:
+    task_str = _RECYCLE_TEMPLATE.format(host=host, domain=domain)
     filename = "{}_{}.yml".format(host, domain)
     with open(filename, "w") as f:
         f.write(task_str)
@@ -23,7 +23,7 @@ async def convert_cmd(origin_cmd: str) -> str:
     if origin_cmd.startswith("recycle"):
         cmd, host, app = origin_cmd.split(" ")
         domain = '{}.sissyun.com.cn'.format(app)
-        filename = await create_task_yaml(host, domain)
+        filename = await _create_task_yaml(host, domain)
         return "ansible-playbook {} -vv".format(filename)
     return origin_cmd
 
