@@ -10,7 +10,7 @@ _RECYCLE_TEMPLATE = """---
 """
 
 
-async def _create_task_yaml(host: str, domain: str) -> bool:
+async def _create_task_yaml(host: str, domain: str) -> str:
     task_str = _RECYCLE_TEMPLATE.format(host=host, domain=domain)
     filename = "{}_{}.yml".format(host, domain)
     with open(filename, "w") as f:
