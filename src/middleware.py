@@ -1,7 +1,7 @@
 from aiohttp import web
 
 import setting
-from wechat_utils import AsyncWechat
+from utils.wechat import AsyncWechat
 
 wx = AsyncWechat(setting.WECHAT_CORPID, setting.WECHAT_SECRET)
 

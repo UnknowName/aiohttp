@@ -1,7 +1,7 @@
 import asyncio
 import unittest
 
-from src.wechat_utils import WechatXML
+from utils.wechat import WechatXML
 
 
 def async_wrapper(coro):
