@@ -6,7 +6,7 @@ _RECYCLE_TEMPLATE = """---
   - name: Restart {domain} IIS WebApplicationPool
     win_iis_webapppool:
       name: {domain}
-      state: restart
+      state: restarted
 """
 
 
@@ -24,7 +24,7 @@ async def convert_cmd(origin_cmd: str) -> str:
         cmd, host, app = origin_cmd.split(" ")
         domain = '{}.sissyun.com.cn'.format(app)
         filename = await _create_task_yaml(host, domain)
-        return "ansible-playbook {} -vv".format(filename)
+        return "ansible-playbook {}".format(filename)
     return origin_cmd
 
 
