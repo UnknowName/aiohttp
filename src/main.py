@@ -1,6 +1,5 @@
 import time
 import urllib.parse
-from subprocess import run, STDOUT, PIPE
 
 from aiohttp import web
 
@@ -8,7 +7,7 @@ import setting
 from utils.log import Log
 from middleware import add_notify
 from graylog_alert import graylog
-from utils.recycle import convert_cmd
+from utils.cmds import RecycleCommand
 from utils.wechat import WechatCrypto, WechatXML
 
 
@@ -54,9 +53,8 @@ async def wechat(request):
             user = await WechatXML.parse_data(plain_msg, "FromUserName")
             if user in setting.WECHAT_ALLOW_USERS:
                 log.info("user {user} run {cmd}".format(user=user, cmd=msg))
-                cmd = await convert_cmd(msg)
-                cmd_output = await run_cmd(cmd)
-                await wx_notify([user], cmd_output)
+                cmd_thread = RecycleCommand(msg, wx_notify, [user])
+                cmd_thread.start()
             else:
                 log.info("User {user} not privilege".format(user=user))
                 await wx_notify([user], "Permission Deny")
@@ -64,11 +62,6 @@ async def wechat(request):
     else:
         log.info("Not Support method {}".format(args.method))
         return web.Response(status=405, text="Not allowed method")
-
-
-async def run_cmd(cmd: str) -> str:
-    stdout = run(cmd, shell=True, stdout=PIPE, stderr=STDOUT).stdout
-    return stdout.decode("utf8")
 
 
 if __name__ == "__main__":
