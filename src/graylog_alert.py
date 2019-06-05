@@ -16,7 +16,7 @@ async def graylog(request):
             err_time = utc2sh(err_log.get("timestamp"))
             err_msg = err_log.get("message")
             if not hasattr(err_log, "Thread"):
-                err_upstrem = err_log.get("upstream_addr")
+                err_upstream = err_log.get("upstream_addr")
                 log_item = "Time: {0}\nErrorLog: {1}\nFROM: {2}\n".format(err_time, err_msg, err_upstream)
             else:
                 err_from = err_log.get("source")
