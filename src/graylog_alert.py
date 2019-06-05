@@ -15,12 +15,12 @@ async def graylog(request):
         for err_log in err_logs:
             err_time = utc2sh(err_log.get("timestamp"))
             err_msg = err_log.get("message")
-            if not hasattr(err_log, "Thread"):
+            if "url" in err_msg:
                 err_upstream = err_log.get("upstream_addr")
-                log_item = "Time: {0}\nErrorLog: {1}\nFROM: {2}\n".format(err_time, err_msg, err_upstream)
+                log_item = "Time: {0}\nErrorLog: {1}\nFrom: {2}\n".format(err_time, err_msg, err_upstream)
             else:
                 err_from = err_log.get("source")
-                log_item = "Time: {0}\nErrorLog: {1}\nFROM: {2}\n".format(err_time, err_msg, err_from)
+                log_item = "Time: {0}\nErrorLog: {1}\nFrom: {2}\n".format(err_time, err_msg, err_from)
             message += log_item + ('-' * 20) + "\n"
         await wx_notify(setting.WECHAT_NOTIFY_USERS, message)
     return web.Response(status=200, text=request.method)
