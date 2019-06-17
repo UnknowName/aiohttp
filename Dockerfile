@@ -10,8 +10,8 @@ RUN adduser -D -u 120002 -h /opt/app app \
     && pip install --no-cache-dir -i https://mirrors.aliyun.com/pypi/simple/ pywinrm ansible \
     && apk del gcc g++ make libffi-dev openssl-dev tzdata \
     && rm -rf /var/cache/apk/*
-# ADD ./kubectl /usr/local/bin/
-# ADD ./.kube   /opt/app/.kube
+ADD ./kubectl /usr/local/bin/
+ADD ./.kube   /opt/app/.kube
 RUN chown -R app:app /opt/app
 USER app
 EXPOSE 8080
