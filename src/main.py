@@ -7,7 +7,7 @@ import setting
 from utils.log import Log
 from middleware import add_notify
 from graylog_alert import graylog
-from utils.cmds import RecycleCommand
+from utils.cmds import ParseCommand
 from utils.wechat import WechatCrypto, WechatXML
 
 
@@ -53,7 +53,7 @@ async def wechat(request):
             user = await WechatXML.parse_data(plain_msg, "FromUserName")
             if user in setting.WECHAT_ALLOW_USERS:
                 log.info("user {user} run {cmd}".format(user=user, cmd=msg))
-                cmd_thread = RecycleCommand(msg, wx_notify, [user])
+                cmd_thread = ParseCommand(msg, wx_notify, [user]).get_cmd_thread()
                 cmd_thread.start()
             else:
                 log.info("User {user} not privilege".format(user=user))

@@ -19,6 +19,17 @@ class BaseCommand(Thread):
         except UnicodeDecodeError:
             return stdout.decode("gbk")
 
+    def run(self) -> None:
+        cmd_output = self.execute_cmd(self._cmd)
+        if iscoroutinefunction(self._func):
+            import asyncio
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            loop.run_until_complete(self._func(self._users, cmd_output))
+            loop.close()
+        else:
+            self._func(self._users, cmd_output)
+
 
 class RecycleCommand(BaseCommand):
     _RECYCLE_TEMPLATE = """---
@@ -60,9 +71,51 @@ class RecycleCommand(BaseCommand):
             self._func(self._users, cmd_output)
 
 
+class ServicesCommand(BaseCommand):
+    _command_template = """---
+    - host: {host}
+      tasks:
+      - name: Restart docker-compose service {service_name}
+        shell: cd /data/${service_name}&&docker-compose restart
+    """
+
+
+class _SystemCommandThread(BaseCommand):
+    pass
+
+
+class ParseCommand(object):
+    def __init__(self, wechat_msg: str, notify_func, notify_users: list):
+        try:
+            cmd, host, service = wechat_msg.split(" ")
+            self.cmd = cmd
+            self.host = host
+            self.service = service
+        except ValueError:
+            self.cmd = wechat_msg
+        self.notify_func = notify_func
+        self.notify_users = notify_users
+
+    def get_cmd_thread(self):
+        if self.cmd == "recycle":
+            print("执行回收IIS命令")
+        elif self.cmd == "service":
+            print("执行服务相关命令")
+        elif self.cmd == "run":
+            print("执行启动Windows进程服务")
+        else:
+            print("默认执行系统的命令")
+            return _SystemCommandThread(self.cmd, self.notify_func, self.notify_users)
+
+
 if __name__ == '__main__':
+    """"
     async def func(x, y):
         print(x, y)
     cmd_thread = RecycleCommand("recycle o2o10 shop", func, ["tkggvfhpce2"])
     cmd_thread.start()
+    """
+    origin = ParseCommand("service rabbitmq-prod")
+    if origin:
+        print(True)
 
