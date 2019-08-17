@@ -81,7 +81,24 @@ class ServicesCommand(BaseCommand):
 
 
 class _SystemCommandThread(BaseCommand):
+    """Execute System Command"""
     pass
+
+
+class _RunWindowsProcess(BaseCommand):
+    """Run a windows .exe file"""
+    _template_fmt = r"""---
+    - host: 
+      - {host}
+      tasks:
+      - name: Stop old process
+        win_command: powershell.exe Stop-Process -Name ApplicationName
+          
+      - name: Run new process
+        win_command: application.exe 
+        args:
+          chdir: D:\iisroot\
+    """
 
 
 class ParseCommand(object):
@@ -99,7 +116,7 @@ class ParseCommand(object):
     def get_cmd_thread(self):
         if self.cmd == "recycle":
             print("执行回收IIS命令")
-        elif self.cmd == "service":
+        elif self.cmd == "restart":
             print("执行服务相关命令")
         elif self.cmd == "run":
             print("执行启动Windows进程服务")
