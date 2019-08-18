@@ -50,7 +50,7 @@ class _BaseCommand(Thread):
             self._func(self._users, cmd_output)
 
 
-class _RecycleCommand(_BaseCommand):
+class _RecycleCommandThread(_BaseCommand):
     _command_template = r"""
     ---
     - hosts:
@@ -64,15 +64,15 @@ class _RecycleCommand(_BaseCommand):
     """
 
 
-class ServicesCommand(_BaseCommand):
+class _ServicesCommandThread(_BaseCommand):
     _command_template = r"""
     ---
     - host:
       - {host}
       gather_facts: False
       tasks:
-      - name: Restart docker-compose service {service_name}
-        shell: cd /data/${service_name}&&docker-compose restart
+      - name: Restart docker-compose service {service}
+        shell: cd /data/{service} && docker-compose restart
     """
 
 
@@ -81,7 +81,7 @@ class _SystemCommandThread(_BaseCommand):
     pass
 
 
-class _RunWindowsProcess(_BaseCommand):
+class _RunWindowsProcessThread(_BaseCommand):
     """Run a windows .exe file"""
     _command_template = r"""
     ---
@@ -90,12 +90,12 @@ class _RunWindowsProcess(_BaseCommand):
       gather_facts: False
       tasks:
       - name: Stop old process
-        win_command: powershell.exe Stop-Process -Name {service}.exe
+        win_command: powershell.exe  Stop-Process -Name SiXunMall.RabbitMq.WinServer.exe
           
       - name: Run new process
-        win_command: {service}.exe 
+        win_command: SiXunMall.RabbitMq.WinServer.exe
         args:
-          chdir: D:\iisroot\
+          chdir: E:\Program Files\微商店3.0队列\
     """
 
 
@@ -114,11 +114,11 @@ class ParseCommand(object):
 
     def get_cmd_thread(self):
         if self.cmd == 'recycle':
-            return _RecycleCommand(self.cmd, self.host, self.service, self.notify_func, self.notify_users)
-        elif self.cmd == 'service':
-            pass
+            return _RecycleCommandThread(self.cmd, self.host, self.service, self.notify_func, self.notify_users)
+        elif self.cmd == 'restart':
+            return _ServicesCommandThread(self.cmd, self.host, self.service, self.notify_func, self.notify_users)
         elif self.cmd == 'run':
-            return _RunWindowsProcess(self.cmd, self.host, self.service, self.notify_func, self.notify_users)
+            return _RunWindowsProcessThread(self.cmd, self.host, self.service, self.notify_func, self.notify_users)
         else:
             print("默认执行系统的命令")
             return _SystemCommandThread(self.cmd, "", "", self.notify_func, self.notify_users)
@@ -127,5 +127,5 @@ class ParseCommand(object):
 if __name__ == '__main__':
     async def func(x, y):
         print(x, y)
-    cmd_thread = ParseCommand("recycle O2O20 shop", func, ["tkggvfhpce2"]).get_cmd_thread()
+    cmd_thread = ParseCommand("restart rabbit1 rabbitmq-prod", func, ["tkggvfhpce2"]).get_cmd_thread()
     cmd_thread.start()
