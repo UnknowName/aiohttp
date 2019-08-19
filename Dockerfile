@@ -15,4 +15,4 @@ ADD ./.kube   /opt/app/.kube
 RUN chown -R app:app /opt/app
 USER app
 EXPOSE 8080
-CMD python main.py
+CMD ["python", "-u", "main.py"]
