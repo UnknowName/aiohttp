@@ -104,8 +104,10 @@ class ParseCommand(object):
     def __init__(self, wechat_msg: str, notify_func, notify_users: list):
         try:
             cmd, host, service = wechat_msg.split(" ")
-            # 这个_cmd是用来判断命令的类型
             self.cmd = cmd
+            # kubectl先特殊处理
+            if cmd == "kubectl":
+                self.cmd = wechat_msg
             self.service = service
             self.host = host
         except ValueError:
@@ -121,12 +123,12 @@ class ParseCommand(object):
         elif self.cmd == 'run':
             return _RunWindowsProcessThread(self.cmd, self.host, self.service, self.notify_func, self.notify_users)
         else:
-            print("默认执行系统的命令")
+            print("执行系统命令: {}".format(self.cmd))
             return _SystemCommandThread(self.cmd, "", "", self.notify_func, self.notify_users)
 
 
 if __name__ == '__main__':
     async def func(x, y):
         print(x, y)
-    cmd_thread = ParseCommand("run oso6 windows", func, ["tkggvfhpce2"]).get_cmd_thread()
+    cmd_thread = ParseCommand("kubectl get ns", func, ["tkggvfhpce2"]).get_cmd_thread()
     cmd_thread.start()
