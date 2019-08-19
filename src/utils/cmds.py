@@ -52,9 +52,8 @@ class _BaseCommand(Thread):
 
 class _RecycleCommandThread(_BaseCommand):
     _command_template = r"""
-    ---
     - hosts:
-      - {host}
+      - "{host}"
       gather_facts: False
       tasks:
       - name: Restart {service} IIS WebApplicationPool
@@ -66,9 +65,8 @@ class _RecycleCommandThread(_BaseCommand):
 
 class _ServicesCommandThread(_BaseCommand):
     _command_template = r"""
-    ---
-    - host:
-      - {host}
+    - hosts:
+      - "{host}"
       gather_facts: False
       tasks:
       - name: Restart docker-compose service {service}
@@ -84,16 +82,19 @@ class _SystemCommandThread(_BaseCommand):
 class _RunWindowsProcessThread(_BaseCommand):
     """Run a windows .exe file"""
     _command_template = r"""
-    ---
-    - host: 
-      - {host}
+    - hosts: 
+      - "{host}"
       gather_facts: False
       tasks:
       - name: Stop old process
-        win_command: powershell.exe  Stop-Process -Name SiXunMall.RabbitMq.WinServer.exe
+        win_command: powershell.exe  Stop-Process -Force -name "SiXunMall.RabbitMq.WinServer.exe"
+        
+      - name: Sleep 5 seconds
+        pause:
+          seconds: 5
           
       - name: Run new process
-        win_command: SiXunMall.RabbitMq.WinServer.exe
+        win_command: powershell.exe Start-Process -FilePath "SiXunMall.RabbitMq.WinServer.exe"
         args:
           chdir: E:\Program Files\微商店3.0队列\
     """
@@ -127,5 +128,5 @@ class ParseCommand(object):
 if __name__ == '__main__':
     async def func(x, y):
         print(x, y)
-    cmd_thread = ParseCommand("restart rabbit1 rabbitmq-prod", func, ["tkggvfhpce2"]).get_cmd_thread()
+    cmd_thread = ParseCommand("run oso6 windows", func, ["tkggvfhpce2"]).get_cmd_thread()
     cmd_thread.start()
