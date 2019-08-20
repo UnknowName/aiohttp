@@ -14,7 +14,9 @@ RUN adduser -D -u 120002 -h /opt/app app \
     && rm -rf /var/cache/apk/*
 ADD ./kubectl /usr/local/bin/
 ADD ./.kube   /opt/app/.kube
-RUN chown -R app:app /opt/app
+ADD /root/.ssh/id_rsa /opt/app/.ssh/id_rsa
+RUN chown -R app:app /opt/app \
+     && chmod 700 /opt/app/.ssh/id_rsa
 USER app
 EXPOSE 8080
 CMD ["python", "-u", "main.py"]
