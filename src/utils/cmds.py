@@ -87,16 +87,19 @@ class _RunWindowsProcessThread(_BaseCommand):
       gather_facts: False
       tasks:
       - name: Stop old process
-        win_command: powershell.exe  Stop-Process -Force -name "SiXunMall.RabbitMq.WinServer.exe"
+        win_shell: Stop-Process -Force -name "SiXunMall.RabbitMq.WinServer"
+        ignore_errors: True
         
       - name: Sleep 5 seconds
         pause:
           seconds: 5
           
       - name: Run new process
-        win_command: powershell.exe Start-Process -FilePath "SiXunMall.RabbitMq.WinServer.exe"
+        win_command: cmd.exe /c START SiXunMall.RabbitMq.WinServer.exe&
         args:
           chdir: E:\Program Files\微商店3.0队列\
+        async: 10
+        ignore_errors: True
     """
 
 
