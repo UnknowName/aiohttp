@@ -5,13 +5,32 @@
 
       实现发送消息到微信,在运行的服务器上执行命令，返回结果
     ![Shell](images/wechat-shell.png)
+
+    重启rabbitmq-prod集群
+
+      cluster rabbitmq-prod restart
         
+    回收O2O6的shop的应用池
+    
+      recycle O2O6 shop
+
+    启动TEST02的指定进程
+
+      run TEST02 windows
+
+    其他系统级别命令
+
+      whoami
+      ...
+
+    
 - /graylog
 
         Graylog的Alert告警回调
      ![Graylog](images/graylog-alert.png)
      
      *以上实现需要配合`GraylogStream`与`Graylog Alert`实现
+
      
 ## 运行
 
