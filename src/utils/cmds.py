@@ -103,6 +103,22 @@ class _RunWindowsProcessThread(_BaseCommand):
     """
 
 
+class _ClusterCommand(_BaseCommand):
+    _command_template = r"""
+        - hosts:
+          - "{host}"
+          gather_facts: False
+          serial: 1
+          
+          tasks:
+          - name: Restart {host} Clusters
+            # In Fact,service is action like up/down/restart
+            shell: cd /data/{host} && docker-compose {service}
+            async: 90
+            poll: 45
+        """
+
+
 class ParseCommand(object):
     def __init__(self, wechat_msg: str, notify_func, notify_users: list):
         try:
@@ -125,6 +141,11 @@ class ParseCommand(object):
             return _ServicesCommandThread(self.cmd, self.host, self.service, self.notify_func, self.notify_users)
         elif self.cmd == 'run':
             return _RunWindowsProcessThread(self.cmd, self.host, self.service, self.notify_func, self.notify_users)
+        elif self.cmd == 'cluster':
+            # When cluster command start, the last args is the action
+            # Like restart/up/down
+            action = self.service
+            return _ClusterCommand("", self.host, action, self.notify_func, self.notify_users)
         else:
             print("执行系统命令: {}".format(self.cmd))
             return _SystemCommandThread(self.cmd, "", "", self.notify_func, self.notify_users)
@@ -133,5 +154,5 @@ class ParseCommand(object):
 if __name__ == '__main__':
     async def func(x, y):
         print(x, y)
-    cmd_thread = ParseCommand("kubectl get ns", func, ["tkggvfhpce2"]).get_cmd_thread()
+    cmd_thread = ParseCommand("cluster rabbitmq-prod start", func, ["tkggvfhpce2"]).get_cmd_thread()
     cmd_thread.start()
