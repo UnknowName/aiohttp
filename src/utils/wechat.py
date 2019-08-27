@@ -21,7 +21,8 @@ class WechatXML(object):
             root = ET.fromstring(xml_data)
             text = root.find(attr).text
         # No the attr
-        except AttributeError:
+        except Exception as e:
+            print("Parse XML data error occurd ", e)
             text = ""
         return text
 
