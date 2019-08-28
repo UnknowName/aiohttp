@@ -1,7 +1,9 @@
 import time
 import urllib.parse
 
+import jinja2
 from aiohttp import web
+import aiohttp_jinja2
 
 import setting
 from utils.log import Log
@@ -9,6 +11,7 @@ from middleware import add_notify
 from graylog_alert import graylog
 from utils.cmds import ParseCommand
 from utils.wechat import WechatCrypto, WechatXML
+from iis_deploy import deployment, get_servers
 
 
 async def wechat(request):
@@ -68,13 +71,21 @@ if __name__ == "__main__":
     log = Log('__name__').get_loger()
     log.info("Start at {}".format(time.asctime()))
     app = web.Application(middlewares=[add_notify])
+    aiohttp_jinja2.setup(
+        app,
+        loader=jinja2.FileSystemLoader("templates")
+    )
     app.add_routes(
         [
             web.get('/wechat', wechat),
             web.post('/wechat', wechat),
             # Graylog Alert
             web.get('/graylog', graylog),
-            web.post('/graylog', graylog)
+            web.post('/graylog', graylog),
+            # IIS deployment
+            web.get('/deploy', deployment),
+            web.post('/deploy', deployment),
+            web.post('/deploy/iis', get_servers)
         ]
     )
     web.run_app(app, port=8080)
