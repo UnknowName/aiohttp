@@ -18,7 +18,7 @@ WECHAT_NOTIFY_USERS = os.getenv("WECHAT_NOTIFY_USERS", "").split(",")
 class EnvError(Exception):
     pass
 
-
+"""
 if not WECHAT_AESKEY:
     raise EnvError("WECHAT_AESKEY  environment not set")
 
@@ -30,7 +30,7 @@ if not WECHAT_SECRET:
 
 if not WECHAT_TOKEN:
     raise EnvError("WECHAT_TOKEN environment not set")
-
+"""
 
 if __name__ == '__main__':
     print(WECHAT_ALLOW_USERS)

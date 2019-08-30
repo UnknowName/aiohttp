@@ -12,7 +12,7 @@
     </style>
 </head>
 <body>
-    <form onsubmit="return checkData()" accept-charset="utf-8" method="post" enctype="multipart/form-data" action="/deploy">
+    <form onsubmit="return checkData()" method="post" enctype="multipart/form-data" action="/deploy">
         {%- for domain in domains -%}
         <li><input type="radio" name="domain" value="{{ domain }}"/>{{ domain }}</li>
             {%- for iis in domains[domain] -%}

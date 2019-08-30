@@ -1,8 +1,12 @@
 import os
+import time
+from queue import Queue, Empty
 
 import aiohttp_jinja2
 from aiohttp import web
 
+LOG_QUEUE = Queue()
+# LOG_QUEUE.put("test")
 DOMAINS = {
     "www.a.com": [
         "128.0.255.27",
@@ -16,7 +20,16 @@ DOMAINS = {
 
 
 @aiohttp_jinja2.template("iis_deploy.html")
+async def index(request):
+    if request.method == "GET":
+        return {"domains": DOMAINS}
+
+
+@aiohttp_jinja2.template("deploy_log.html")
 async def deployment(request):
+    global LOG_QUEUE
+    if not LOG_QUEUE.empty():
+        return {"message": "部署失败，因为当前有项目正在执行部署，可以稍后再试，上次部署日志:"}
     if request.method == 'POST':
         data = await request.multipart()
         field = await data.next()
@@ -36,6 +49,7 @@ async def deployment(request):
                 if not os.path.exists(packet_folder):
                     os.mkdir(packet_folder)
                 filename = field.filename
+                LOG_QUEUE.put("开始处理上传的文件")
                 # 防止OOM，通过流方式将用户上传的文件写入本地目录
                 size = 0
                 with open(os.path.join(packet_folder, filename), 'wb') as f:
@@ -48,11 +62,27 @@ async def deployment(request):
                         f.write(chunk)
             # 读取下一个field，直到为None
             field = await data.next()
-        print("用户文件流量处理完毕，开始准备生成执行AnsiblePlaybook")
+        LOG_QUEUE.put(f"部署的站点: {domain}")
+        LOG_QUEUE.put(f"部署的服务器: {servers}")
+        LOG_QUEUE.put("上传文件处理完毕，开始生成部署工作流程")
         print(domain, servers)
-        ws = web.WebSocketResponse()
-        await ws.prepare(request)
+        time.sleep(2)
+        # 消息结束标志位
+        LOG_QUEUE.put("EOF")
+    return {"message": "部署动作已放入后台执行，以下是部署日志："}
+
+
+async def deploy_log(request):
+    global LOG_QUEUE
+    ws = web.WebSocketResponse()
+    await ws.prepare(request)
+    try:
+        log = LOG_QUEUE.get(timeout=6)
+    except Empty:
+        print("Queue is empty yet")
         return ws
-    elif request.method == 'GET':
-        return {"domains": DOMAINS}
-    return web.Response(status=200, text="Ok")
+    while log != "EOF":
+        time.sleep(1.5)
+        await ws.send_str(log)
+        log = LOG_QUEUE.get()
+    return ws

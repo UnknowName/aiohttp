@@ -11,7 +11,7 @@ from middleware import add_notify
 from graylog_alert import graylog
 from utils.cmds import ParseCommand
 from utils.wechat import WechatCrypto, WechatXML
-from iis_deploy import deployment
+from iis_deploy import deployment, index, deploy_log
 
 
 async def wechat(request):
@@ -83,8 +83,11 @@ if __name__ == "__main__":
             web.get('/graylog', graylog),
             web.post('/graylog', graylog),
             # IIS deployment
-            web.get('/deploy', deployment),
+            web.get('/deploy', index),
+            # Debug for websocket
+            # web.get('/deploy', deployment),
             web.post('/deploy', deployment),
+            web.get('/deploy/log', deploy_log)
         ]
     )
     web.run_app(app, port=8080)
