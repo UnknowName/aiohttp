@@ -1,0 +1,18 @@
+#Windows PowerShell Template
+# Generate the backup powershell script
+# Must Variables:
+#     smb_name       str   --->FileShare Username
+#     smb_password   str   --->FileShare User's Password
+#     date           str   --->Date format Like 201709301022
+#     domain         str   --->Will Backup Domain,Like www.a.com
+$Logs="*.log", "*.txt"
+$Username = "{{ smb_username }}";
+$Password = ConvertTo-SecureString "{{ smb_password }}" -AsPlainText -Force;
+$mycreds = New-Object System.Management.Automation.PSCredential($Username, $Password);
+if (!(Test-Path z:)) {
+    New-PSDrive -Name  Z  -PSProvider FileSystem  -Root  "\\172.18.171.110\backups" -Credential $mycreds -Persist;
+}
+if (!(Test-Path Z:\{{ domain }}\{{ date }})) {
+    New-Item -type directory -path "Z:\{{ domain }}\{{ date }}"
+}
+copy-item -Recurse -Force -Exclude $Logs "d:\wwwroot\{{ domain }}" -Destination "Z:\{{ domain }}\{{ date }}"
