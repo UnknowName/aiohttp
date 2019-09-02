@@ -1,0 +1,64 @@
+{-% set site_conf=/etc/nginx/conf.d/{{ domain }}.conf %-}
+# Before Update, Set host down in NGINX
+- hosts:
+  {% for ngx in nginxs %}
+  - {{ ngx }}
+  {% endfor %}
+  tasks:
+    {% for iis in servers %}
+    - name: "Comment {{ iis }} in NGINX upstream"
+      lineinfile:
+        path: {{ site_conf }}
+        regexp: '(\s*server\s*{{ iis }}.*)'
+        backrefs: yes
+        line: '#\1'
+    {% endfor %}
+
+    - name: "Reload NGINX"
+      shell: nginx -t && systemctl reload nginx
+
+# Update IIS Server WebSite Files
+- hosts:
+  {%- for server in servers %-}
+    - {{ server }}
+  {%- endfor -%}
+  tasks:
+    # 脚本在服务器上生成，然后全部复制过去,win_copy暂不支持with_items语法
+    - name: Copy Backup Powershell Scripts
+      win_copy:
+        src: backup.ps1
+        dest: D:\tmp\
+
+    - name: Copy Update Powershell Scripts
+      win_copy:
+        src: update.ps1
+        dest: D:\tmp\
+
+    - name: Copy Update Files
+      win_copy:
+        src: {{ path }}
+        dest: D:\tmp\
+
+    - name: Run Backup Powershell Script
+      win_command: D:\tmp\backup.ps1
+
+    - name: Execute Update Script.Recycle Site WebpoolApplication
+      win_command: D:\tmp\update.ps1
+
+# After Update.Set host Up on NGINX
+- hosts:
+  {% for ngx in nginxs %}
+  - {{ ngx }}
+  {% endfor %}
+  tasks:
+    {% for iis in servers %}
+    - name: "Uncomment {{ iis }} in NGINX upstream"
+      lineinfile:
+        path: {{ site_conf }}
+        regexp: '#(\s*server\s*{{ iis }}.*)'
+        backrefs: yes
+        line: '\1'
+    {% endfor %}
+
+    - name: "Reload NGINX"
+      shell: nginx -t && systemctl reload nginx
