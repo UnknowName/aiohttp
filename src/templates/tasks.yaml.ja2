@@ -1,4 +1,4 @@
-{-% set site_conf=/etc/nginx/conf.d/{{ domain }}.conf %-}
+{% set site_conf="/etc/nginx/conf.d/{{ domain }}.conf" %}
 # Before Update, Set host down in NGINX
 - hosts:
   {% for ngx in nginxs %}
@@ -6,7 +6,7 @@
   {% endfor %}
   tasks:
     {% for iis in servers %}
-    - name: "Comment {{ iis }} in NGINX upstream"
+    - name: Comment {{ iis }} in NGINX upstream
       lineinfile:
         path: {{ site_conf }}
         regexp: '(\s*server\s*{{ iis }}.*)'
@@ -14,16 +14,19 @@
         line: '#\1'
     {% endfor %}
 
-    - name: "Reload NGINX"
+    - name: Reload NGINX
       shell: nginx -t && systemctl reload nginx
+
+    - name: Sleep 60 second for iis complete request
+      pause: seconds=60
 
 # Update IIS Server WebSite Files
 - hosts:
-  {%- for server in servers %-}
+  {% for server in servers %}
     - {{ server }}
-  {%- endfor -%}
+  {% endfor %}
   tasks:
-    # 脚本在服务器上生成，然后全部复制过去,win_copy暂不支持with_items语法
+    # win_copy not support with_items yet
     - name: Copy Backup Powershell Scripts
       win_copy:
         src: backup.ps1
@@ -36,7 +39,7 @@
 
     - name: Copy Update Files
       win_copy:
-        src: {{ path }}
+        src: {{ update_file }}
         dest: D:\tmp\
 
     - name: Run Backup Powershell Script
@@ -51,8 +54,11 @@
   - {{ ngx }}
   {% endfor %}
   tasks:
+    - name: Sleep 60 second wait for iis startup complete
+      pause: seconds=60
+
     {% for iis in servers %}
-    - name: "Uncomment {{ iis }} in NGINX upstream"
+    - name: Uncomment {{ iis }} in NGINX upstream
       lineinfile:
         path: {{ site_conf }}
         regexp: '#(\s*server\s*{{ iis }}.*)'
@@ -60,5 +66,5 @@
         line: '\1'
     {% endfor %}
 
-    - name: "Reload NGINX"
+    - name: Reload NGINX
       shell: nginx -t && systemctl reload nginx

@@ -4,7 +4,7 @@ domain        str  Update domain.example www.a.com
 #>
 Import-Module WebAdministration
 
-Expand-Archive -Force  -Path {{ zip_file }}  -DestinationPath D:\wwwroot\{{ domain }}
+Expand-Archive -Force  -Path D:\tmp\{{ zip_file }}  -DestinationPath D:\wwwroot\{{ domain }}
 
 $site = "{{ domain }}"
 $pool = (Get-Item "IIS:\Sites\$site"| Select-Object applicationPool).applicationPool
