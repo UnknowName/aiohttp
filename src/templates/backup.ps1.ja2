@@ -12,7 +12,7 @@ $mycreds = New-Object System.Management.Automation.PSCredential($Username, $Pass
 if (!(Test-Path z:)) {
     New-PSDrive -Name  Z  -PSProvider FileSystem  -Root  "\\172.18.171.110\backups" -Credential $mycreds -Persist;
 }
-if (!(Test-Path Z:\{{ domain }}\{{ date }})) {
-    New-Item -type directory -path "Z:\{{ domain }}\{{ date }}"
+if (!(Test-Path Z:\{{ date }})) {
+    New-Item -type directory -path "Z:\{{ date }}"
 }
-copy-item -Recurse -Force -Exclude $Logs "d:\wwwroot\{{ domain }}" -Destination "Z:\{{ domain }}\{{ date }}"
+copy-item -Recurse -Force -Exclude $Logs "d:\wwwroot\{{ domain }}" -Destination "Z:\{{ date }}"
