@@ -131,7 +131,7 @@ class AnsibleThread(threading.Thread):
         _cmds = ["ansible-playbook", self.playbook]
         stdout = Popen(_cmds, stdout=PIPE, stderr=PIPE).stdout
         for line in stdout:
-            info = line.decode("utf8").split("\n")
+            info = line.decode("utf8").strip("\n")
             if info:
                 LOG_QUEUE.put(info)
         # Message end flag
