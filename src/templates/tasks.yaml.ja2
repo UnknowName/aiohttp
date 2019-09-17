@@ -1,4 +1,3 @@
-{% set site_conf="/etc/nginx/conf.d/{{ domain }}.conf" %}
 # Before Update, Set host down in NGINX
 - hosts:
   {% for ngx in nginxs %}
@@ -9,7 +8,7 @@
     {% for iis in servers %}
     - name: Comment {{ iis }} in NGINX upstream
       lineinfile:
-        path: {{ site_conf }}
+        path: /etc/nginx/conf.d/{{ domain }}.conf
         regexp: '(\s*server\s*{{ iis }}.*)'
         backrefs: yes
         line: '#\1'
@@ -63,7 +62,7 @@
     {% for iis in servers %}
     - name: Uncomment {{ iis }} in NGINX upstream
       lineinfile:
-        path: {{ site_conf }}
+        path: /etc/nginx/conf.d/{{ domain }}.conf
         regexp: '#(\s*server\s*{{ iis }}.*)'
         backrefs: yes
         line: '\1'
