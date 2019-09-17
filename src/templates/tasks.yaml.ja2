@@ -4,6 +4,7 @@
   {% for ngx in nginxs %}
   - {{ ngx }}
   {% endfor %}
+  gather_facts: no
   tasks:
     {% for iis in servers %}
     - name: Comment {{ iis }} in NGINX upstream
@@ -25,6 +26,7 @@
   {% for server in servers %}
     - {{ server }}
   {% endfor %}
+  gather_facts: no
   tasks:
     # win_copy not support with_items yet
     - name: Copy Backup Powershell Scripts
@@ -53,6 +55,7 @@
   {% for ngx in nginxs %}
   - {{ ngx }}
   {% endfor %}
+  gather_facts: no
   tasks:
     - name: Sleep 60 second wait for iis startup complete
       pause: seconds=60
