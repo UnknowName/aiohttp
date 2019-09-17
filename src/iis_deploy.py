@@ -2,7 +2,7 @@ import os
 import time
 import threading
 from queue import Queue, Empty
-from subprocess import run, STDOUT, PIPE
+from subprocess import Popen, STDOUT, PIPE
 
 import jinja2
 import aiohttp_jinja2
@@ -128,10 +128,11 @@ class AnsibleThread(threading.Thread):
         self.playbook = playbook
 
     def run(self):
-        _cmd = f"ansible-playbook {self.playbook}"
-        stdout = run(_cmd, shell=True, stdout=PIPE, stderr=STDOUT).stdout
-        for line in stdout.decode("utf8").split("\n"):
-            if line:
-                LOG_QUEUE.put(line)
+        _cmds = ["ansible-playbook", self.playbook]
+        stdout = Popen(_cmds, stdout=PIPE, stderr=PIPE).stdout
+        for line in stdout:
+            info = line.decode("utf8").split("\n")
+            if info:
+                LOG_QUEUE.put(info)
         # Message end flag
         LOG_QUEUE.put("EOF")
