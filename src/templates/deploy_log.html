@@ -9,7 +9,7 @@
         #loading { display:none }
         #log { margin: 5px auto }
         .log-item { font-size: 15px; margin: 1px 10px; color: green }
-        .error { font-size: 15px; margin: 1px 10px; color:red }
+        .log-error { font-size: 15px; margin: 1px 10px; color:red }
     </style>
     <title>Deploy Logs</title>
 </head>
@@ -51,7 +51,7 @@ function logOutput() {
         if (data.match("FAILED")) {
             var info = data.split("=>");
             var logObj = $.parseJSON(info[1]);
-            logDiv.append(`<li class="error">${time}&nbsp;ERROR: ${logObj.msg}<li>`);
+            logDiv.append(`<li class="log-error">${time}&nbsp;ERROR: ${logObj.msg}<li>`);
         } else {
             logDiv.append(`<li class="log-item">${time}&nbsp;${data}</li>`);
         };
