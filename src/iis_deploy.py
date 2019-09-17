@@ -1,16 +1,17 @@
 import os
 import time
-import asyncio
+import threading
 from queue import Queue, Empty
-
+from subprocess import run, STDOUT, PIPE
 
 import jinja2
 import aiohttp_jinja2
 from aiohttp import web
 
 import setting
+from utils.log import Log
 
-
+log = Log(__name__).get_loger()
 LOG_QUEUE = Queue()
 BACKUP_FILENAME = "backup.ps1"
 UPDATE_FILENAME = "update.ps1"
@@ -53,16 +54,11 @@ async def deployment(request):
                 else:
                     servers.append(value.decode("utf8"))
             else:
-                """
-                packet_folder = os.path.join(os.getcwd(), "packets")
-                if not os.path.exists(packet_folder):
-                    os.mkdir(packet_folder)
-                """
                 filename = field.filename
                 LOG_QUEUE.put("开始处理上传的文件")
+                log.debug("开始处理用户上传的文件")
                 # 防止OOM，通过流方式将用户上传的文件写入本地目录
                 size = 0
-                # zip_file = os.path.join(p, filename)
                 with open(filename, 'wb') as f:
                     while True:
                         # 8192 bytes by default.
@@ -73,8 +69,8 @@ async def deployment(request):
                         f.write(chunk)
             # 读取下一个field，直到为None
             field = await data.next()
-        LOG_QUEUE.put(f"部署的站点: {domain}")
-        LOG_QUEUE.put(f"部署的服务器: {servers}")
+        LOG_QUEUE.put(f"部署的站点: {domain},服务器: {servers}")
+        log.debug(f"上传文件处理完毕。部署的站点: {domain},服务器: {servers}")
         LOG_QUEUE.put("上传文件处理完毕，正在生成部署用到的相关文件")
         # 这里不判断要部署的机器，前端只允许一半一半地部署
         # 通过模板生成备份脚本
@@ -92,11 +88,9 @@ async def deployment(request):
             'tasks.yaml.ja2', "task.yaml", update_file=filename,
             domain=domain, nginxs=NGINXS, servers=servers
         )
-        LOG_QUEUE.put("部署playbook生成完成。开始执行相关tasks")
-        await system_cmd("ansible-playbook", task_playbook)
-        time.sleep(2)
-        # 消息结束标志位
-        LOG_QUEUE.put("EOF")
+        LOG_QUEUE.put("部署playbook生成完成，开始执行相关tasks")
+        t = AnsibleThread(task_playbook)
+        t.start()
     return {"message": "部署动作已放入后台执行，以下是部署日志："}
 
 
@@ -105,14 +99,14 @@ async def deploy_log(request):
     ws = web.WebSocketResponse()
     await ws.prepare(request)
     try:
-        log = LOG_QUEUE.get(timeout=6)
+        info = LOG_QUEUE.get(timeout=6)
     except Empty:
         print("Queue is empty yet")
         return ws
-    while log != "EOF":
-        time.sleep(1.5)
+    while info != "EOF":
+        time.sleep(1)
         await ws.send_str(log)
-        log = LOG_QUEUE.get()
+        info = LOG_QUEUE.get()
     return ws
 
 
@@ -126,17 +120,18 @@ async def render(template_name: str, filename: str,  **kwargs):
         return filename
 
 
-async def system_cmd(cmd: str, *args) -> None:
+class AnsibleThread(threading.Thread):
     global LOG_QUEUE
-    process = await asyncio.subprocess.create_subprocess_exec(
-        cmd,
-        *args,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE
-    )
-    # wait subprocess execute over
-    await process.wait()
-    stdout, stderr = await process.communicate()
-    output = stdout if stdout else stderr
-    for line in output.decode("utf8").split("\n"):
-        LOG_QUEUE.put(line)
+
+    def __init__(self, playbook: str):
+        threading.Thread.__init__(self)
+        self.playbook = playbook
+
+    def run(self):
+        _cmd = f"ansible-playbook {self.playbook}"
+        stdout = run(_cmd, shell=True, stdout=PIPE, stderr=STDOUT).stdout
+        for line in stdout.decode("utf8").split("\n"):
+            if line:
+                LOG_QUEUE.put(line)
+        # Message end flag
+        LOG_QUEUE.put("EOF")
