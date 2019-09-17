@@ -37,6 +37,10 @@
                 if (checked == true) {
                     $(`.${clsName}`).css("display", "block");
                 } else {
+                    /*未选中的Radio将Checkbox全部设置为未选中*/
+                    var value=inputs[i].value;
+                    var noSelect=$(`input:checkbox[name="${value}"]`);
+                    noSelect.prop("checked",false);
                     $(`.${clsName}`).css("display", "none");
                 };
             };
