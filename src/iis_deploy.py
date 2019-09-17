@@ -105,7 +105,7 @@ async def deploy_log(request):
         return ws
     while info != "EOF":
         time.sleep(1)
-        await ws.send_str(log)
+        await ws.send_str(info)
         info = LOG_QUEUE.get()
     return ws
 
