@@ -1,0 +1,23 @@
+version: "2"
+
+service:
+  aiohttp-ops:
+    build:
+      context: .
+      dockerfile: "Dockerfile"
+    image: aiohttp
+    container_name: aiohttp-ops
+    ports:
+      - 8080:8080
+    restart: always
+    environment:
+      - WECHAT_CORPID=your_corpid
+      - WECHAT_SECRET=your-secret
+      - WECHAT_TOKEN=your-token
+      - WECHAT_AESKEY=your-aeskey
+      - WECHAT_ALLOW_USERS=user1,user2
+      - WECHAT_NOTIFY_USERS=user1,user2
+      - DDING_TOKEN=dingding-token
+    volumes:
+      - ./ansible_hosts:/etc/ansible/hosts
+      - ./setting.py:/opt/app/src/setting.py
