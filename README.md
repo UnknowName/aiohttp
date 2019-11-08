@@ -47,9 +47,9 @@ docker build -t wechat .
 准备docker-compose.yml
 
 ```yaml
-wechat-shell:
-  image: wechat:dev
-  container_name: wechat-shell
+aiohttp-ops:
+  image: aiohttp
+  container_name: aiohttp-ops
   volumes:
     - ./ansible_hosts:/etc/ansible/hosts
     - ./hosts:/etc/hosts
@@ -61,6 +61,7 @@ wechat-shell:
     - WECHAT_AESKEY=your-aeskey
     - WECHAT_ALLOW_USERS=user1,user2
     - WECHAT_NOTIFY_USERS=user1,user2
+    - DDING_TOKEN=dingding-token
   restart: always
   net: host
 ```
