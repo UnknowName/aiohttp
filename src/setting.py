@@ -21,12 +21,6 @@ DDING_ROBOT_TOKEN = os.getenv("DDING_TOKEN", False)
 class EnvError(Exception):
     pass
 
-
-SMB_USERNAME = "test"
-
-SMB_PASSWORD = "test"
-
-
 if not WECHAT_AESKEY:
     raise EnvError("WECHAT_AESKEY  environment not set")
 
