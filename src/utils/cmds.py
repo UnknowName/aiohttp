@@ -74,6 +74,19 @@ class _ServicesCommandThread(_BaseCommand):
     """
 
 
+class _RestartSiteCommandThread(_BaseCommand):
+    _command_template = r"""
+    - hosts:
+      - "{host}"
+      gather_facts: False
+      tasks:
+      - name: stop website {service}
+        win_shell: Stop-Website -Name {service}
+      - name: start website {service}
+        win_shell: Start-Website -Name {service} 
+    """
+
+
 class _SystemCommandThread(_BaseCommand):
     """Execute System Command"""
     pass
@@ -146,6 +159,8 @@ class ParseCommand(object):
             # Like restart/up/down
             action = self.service
             return _ClusterCommand("", self.host, action, self.notify_func, self.notify_users)
+        elif self.cmd == 'website':
+            return _RestartSiteCommandThread(self.cmd, self.host, self.service, self.notify_func, self.notify_users)
         else:
             print("执行系统命令: {}".format(self.cmd))
             return _SystemCommandThread(self.cmd, "", "", self.notify_func, self.notify_users)
@@ -154,5 +169,5 @@ class ParseCommand(object):
 if __name__ == '__main__':
     async def func(x, y):
         print(x, y)
-    cmd_thread = ParseCommand("cluster rabbitmq-prod start", func, ["tkggvfhpce2"]).get_cmd_thread()
+    cmd_thread = ParseCommand("website o2o10 shopapi", func, ["tkggvfhpce2"]).get_cmd_thread()
     cmd_thread.start()
