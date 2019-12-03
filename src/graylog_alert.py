@@ -10,8 +10,15 @@ async def graylog(request):
     dding_robot = AsyncDDing(setting.DDING_ROBOT_TOKEN)
     if request.method == "POST":
         msg = await request.json()
+        # 老版本字段
         result_msg = msg.get("check_result")
-        err_logs = result_msg.get("matching_messages")
+        if not result_msg:
+            # 新版本
+            result_msg = msg.get("backlog")
+        if isinstance(result_msg, list):
+            err_logs = result_msg
+        else:
+            err_logs = result_msg.get("matching_messages")
         message = "日志系统检测到异常，以下是最近二条的异常详情：\n"
         for err_log in err_logs:
             err_time = utc2sh(err_log.get("timestamp"))
