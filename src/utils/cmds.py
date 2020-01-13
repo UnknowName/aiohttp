@@ -50,6 +50,19 @@ class _BaseCommand(Thread):
             self._func(self._users, cmd_output)
 
 
+class _DockerCommandThread(_BaseCommand):
+    _command_template = ""
+
+    def _get_cmd(self) -> str:
+        if self._cmd == "log":
+            cmd_str = "docker logs --tail 20 finance-{service_name}".format(service_name=self.service)
+        elif self._cmd == "restart":
+            cmd_str = "docker restart finance-{service_name}".format(service_name=self.service)
+        else:
+            cmd_str = ""
+        return "ssh root@{host} '{command}'".format(host=self.host, command=cmd_str)
+
+
 class _RecycleCommandThread(_BaseCommand):
     _command_template = r"""
     - hosts:
@@ -150,8 +163,9 @@ class ParseCommand(object):
     def get_cmd_thread(self):
         if self.cmd == 'recycle':
             return _RecycleCommandThread(self.cmd, self.host, self.service, self.notify_func, self.notify_users)
-        elif self.cmd == 'restart':
-            return _ServicesCommandThread(self.cmd, self.host, self.service, self.notify_func, self.notify_users)
+        elif self.cmd == 'restart' or self.cmd == "log":
+            # return _ServicesCommandThread(self.cmd, self.host, self.service, self.notify_func, self.notify_users)
+            return _DockerCommandThread(self.cmd, self.host, self.service, self.notify_func, self.notify_users)
         elif self.cmd == 'run':
             return _RunWindowsProcessThread(self.cmd, self.host, self.service, self.notify_func, self.notify_users)
         elif self.cmd == 'cluster':
