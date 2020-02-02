@@ -17,9 +17,13 @@
     启动TEST02的指定进程
 
       run TEST02 windows
-
+      
+    重启`Docker`容器
+    
+      docker restart  containerName
+        
     其他系统级别命令
-
+    
       whoami
       ...
 

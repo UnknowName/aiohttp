@@ -55,7 +55,10 @@ class _DockerCommandThread(_BaseCommand):
 
     def _get_cmd(self) -> str:
         if self._cmd == "log":
-            cmd_str = "docker logs --tail 20 finance-{service_name}".format(service_name=self.service)
+            if self.service == "mysql":
+                cmd_str = "journalctl -r -n 10 -u mysqld"
+            else:
+                cmd_str = "docker logs --tail 20 finance-{service_name}".format(service_name=self.service)
         elif self._cmd == "restart":
             cmd_str = "docker restart finance-{service_name}".format(service_name=self.service)
         else:
@@ -163,7 +166,7 @@ class ParseCommand(object):
     def get_cmd_thread(self):
         if self.cmd == 'recycle':
             return _RecycleCommandThread(self.cmd, self.host, self.service, self.notify_func, self.notify_users)
-        elif self.cmd == 'restart' or self.cmd == "log":
+        elif self.cmd == 'restart' or self.cmd == "log" or self.cmd == "service":
             # return _ServicesCommandThread(self.cmd, self.host, self.service, self.notify_func, self.notify_users)
             return _DockerCommandThread(self.cmd, self.host, self.service, self.notify_func, self.notify_users)
         elif self.cmd == 'run':

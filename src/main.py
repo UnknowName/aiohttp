@@ -27,7 +27,7 @@ async def wechat(request):
                                          echostr)
         if msg_sign != wechat_sign:
             log.warning("消息签名不一致")
-            return web.Response(status=405, text="novalied signature")
+            return web.Response(status=405, text="invalid signature")
         echostr = wxcrypt.decry_msg(echostr)
         return web.Response(status=200, text=echostr)
     elif request.method == "POST":
