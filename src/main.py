@@ -22,9 +22,7 @@ async def wechat(request):
                            setting.WECHAT_AESKEY)
     if request.method == "GET":
         echostr = urllib.parse.unquote(args.get('echostr', ""))
-        msg_sign = wxcrypt.get_signature(msg_timestamp,
-                                         msg_nonce,
-                                         echostr)
+        msg_sign = wxcrypt.get_signature(msg_timestamp, msg_nonce, echostr)
         if msg_sign != wechat_sign:
             log.warning("消息签名不一致")
             return web.Response(status=405, text="novalied signature")
@@ -42,9 +40,7 @@ async def wechat(request):
             xml_data = str(data, encoding="utf8")
             # 只过滤加密的用户消息
             encry_msg = await WechatXML.parse_data(xml_data, "Encrypt")
-            if wechat_sign != wxcrypt.get_signature(msg_timestamp,
-                                                    msg_nonce, 
-                                                    encry_msg):
+            if wechat_sign != wxcrypt.get_signature(msg_timestamp, msg_nonce, encry_msg):
                 log.warning("消息签名不一致")
                 return web.Response(status=403, text="deny")
             plain_msg = wxcrypt.decry_msg(encry_msg)

@@ -61,7 +61,9 @@ aiohttp-ops:
     - WECHAT_AESKEY=your-aeskey
     - WECHAT_ALLOW_USERS=user1,user2
     - WECHAT_NOTIFY_USERS=user1,user2
-    - DDING_TOKEN=dingding-token
+    - DDING_TOKEN_DEV=dingding-token-KEY1
+    - DDING_TOKEN_O2O=dingding-token-KEY2
+    - DDING_TOKEN_PAY=dingding-token-KEY3
   restart: always
   net: host
 ```

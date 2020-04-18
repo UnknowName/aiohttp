@@ -5,21 +5,32 @@ from aiohttp import web
 import setting
 from utils.dding import AsyncDDing
 
+DDING_NOTIFY = {
+    'dev': AsyncDDing(setting.DDING_ROBOT_TOKEN_DEV),
+    'o2o': AsyncDDing(setting.DDING_ROBOT_TOKEN_O2O),
+    'pay': AsyncDDing(setting.DDING_ROBOT_TOKEN_PAY)
+}
+
+DEFAULT_ROBOT = AsyncDDing(setting.DDING_ROBOT_TOKEN_DEV)
+
 
 async def graylog(request):
-    dding_robot = AsyncDDing(setting.DDING_ROBOT_TOKEN)
     if request.method == "POST":
         msg = await request.json()
-        # 老版本字段
+        # Graylog的Alert中添加自定义的KEY，
+        event_key = msg.get("event", {}).get("key", "")
+        event_msg = msg.get("event", {}).get("message", "")
+        dding_robot = DDING_NOTIFY.get(event_key, DEFAULT_ROBOT)
+        # 3.0 老版本字段
         result_msg = msg.get("check_result")
         if not result_msg:
-            # 新版本
+            # 3.1/3.2 新版本
             result_msg = msg.get("backlog")
         if isinstance(result_msg, list):
             err_logs = result_msg
         else:
             err_logs = result_msg.get("matching_messages")
-        message = "日志系统检测到异常，以下是最近二条的异常详情：\n"
+        message = "日志系统检测到异常: {}\n以下是最近二条的异常详情：\n".format(event_msg)
         for err_log in err_logs:
             err_time = utc2sh(err_log.get("timestamp"))
             err_msg = err_log.get("message")

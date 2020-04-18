@@ -15,7 +15,11 @@ WECHAT_ALLOW_USERS = os.getenv("WECHAT_ALLOW_USERS", "").split(",")
 WECHAT_NOTIFY_USERS = os.getenv("WECHAT_NOTIFY_USERS", "").split(",")
 
 # DingDing Robot Token
-DDING_ROBOT_TOKEN = os.getenv("DDING_TOKEN", False)
+DDING_ROBOT_TOKEN_O2O = os.getenv("DDING_TOKEN_O2O", False)
+
+DDING_ROBOT_TOKEN_PAY = os.getenv("DDING_TOKEN_PAY", False)
+
+DDING_ROBOT_TOKEN_DEV = os.getenv("DDING_TOKEN_DEV", False)
 
 
 class EnvError(Exception):
@@ -33,8 +37,8 @@ if not WECHAT_SECRET:
 if not WECHAT_TOKEN:
     raise EnvError("WECHAT_TOKEN environment not set")
 
-if not DDING_ROBOT_TOKEN:
-    raise EnvError("DDING_TOKEN environment not set")
+#if not DDING_ROBOT_TOKEN_DEV:
+#    raise EnvError("DDING_TOKEN environment not set")
 
 
 if __name__ == '__main__':
