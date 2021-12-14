@@ -1,4 +1,4 @@
-FROM python:3.6-alpine
+FROM python:3.8-alpine
 ENV APP_HOME=/opt/app PATH=${APP_HOME}/bin:$PATH
 ADD ./src /opt/app
 WORKDIR /opt/app

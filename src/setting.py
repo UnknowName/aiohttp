@@ -25,6 +25,7 @@ DDING_ROBOT_TOKEN_DEV = os.getenv("DDING_TOKEN_DEV", False)
 class EnvError(Exception):
     pass
 
+
 if not WECHAT_AESKEY:
     raise EnvError("WECHAT_AESKEY  environment not set")
 
